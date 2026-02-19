@@ -11,12 +11,9 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-console.log('API Base URL:', API_BASE_URL);
-
 class ApiService {
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log(`API Request: ${options.method || 'GET'} ${url}`);
     
     const config = {
       ...options,
@@ -30,22 +27,25 @@ class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'API request failed');
+        let errorMessage = 'API request failed';
+        try {
+          const error = await response.json();
+          errorMessage = error.message || errorMessage;
+        } catch (e) {
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
-      console.log(`API Response from ${endpoint}:`, data);
       
       // Handle paginated responses - extract results array if present
       if (data && typeof data === 'object' && 'results' in data) {
-        console.log('Paginated response detected, returning results array');
         return data.results;
       }
       
       return data;
     } catch (error) {
-      console.error('API Error:', error);
       throw error;
     }
   }

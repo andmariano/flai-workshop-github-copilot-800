@@ -5,10 +5,24 @@ from .models import UserProfile, Activity, Team, Challenge, WorkoutSuggestion
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model"""
+    profile = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
         read_only_fields = ['id']
+
+    def get_profile(self, obj):
+        """Return a minimal nested representation of the user's profile"""
+        profile = getattr(obj, 'profile', None)
+        if profile is None:
+            return None
+        return {
+            'fitness_level': getattr(profile, 'fitness_level', None),
+            'height': getattr(profile, 'height', None),
+            'weight': getattr(profile, 'weight', None),
+            'bio': getattr(profile, 'bio', None),
+        }
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -19,7 +33,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['_id', 'user', 'age', 'height', 'weight', 'fitness_level', 
-                  'total_points', 'avatar', 'created_at', 'updated_at']
+                  'total_points', 'bio', 'avatar', 'created_at', 'updated_at']
         read_only_fields = ['_id', 'total_points', 'created_at', 'updated_at']
 
     def get__id(self, obj):
@@ -50,7 +64,10 @@ class ActivityCreateSerializer(serializers.ModelSerializer):
         fields = ['activity_type', 'duration', 'distance', 'calories', 'notes', 'date']
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
+        request = self.context.get('request')
+        if not request or not hasattr(request, 'user'):
+            raise serializers.ValidationError("Authentication context is required to create an activity.")
+        validated_data['user'] = request.user
         return super().create(validated_data)
 
 
@@ -84,10 +101,12 @@ class TeamCreateSerializer(serializers.ModelSerializer):
         fields = ['name', 'description', 'avatar']
 
     def create(self, validated_data):
-        validated_data['coach'] = self.context['request'].user
+        request = self.context.get('request')
+        if not request or not hasattr(request, 'user'):
+            raise serializers.ValidationError("Authentication context is required to create a team.")
+        validated_data['coach'] = request.user
         team = Team.objects.create(**validated_data)
-        # Add coach as a member
-        team.members.add(self.context['request'].user)
+        team.members.add(request.user)
         return team
 
 

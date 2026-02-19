@@ -114,6 +114,9 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Create activity and update user profile points"""
+        if not self.request.user.is_authenticated:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Authentication required to log activities.")
         activity = serializer.save(user=self.request.user)
         
         # Update user profile total points
@@ -128,6 +131,8 @@ class ActivityViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_activities(self, request):
         """Get current user's activities"""
+        if not request.user.is_authenticated:
+            return Response({'message': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         activities = Activity.objects.filter(user=request.user)
         serializer = self.get_serializer(activities, many=True)
         return Response(serializer.data)
@@ -135,6 +140,8 @@ class ActivityViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def summary(self, request):
         """Get activity summary for current user"""
+        if not request.user.is_authenticated:
+            return Response({'message': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         activities = Activity.objects.filter(user=request.user)
         
         total_activities = activities.count()
@@ -176,6 +183,8 @@ class TeamViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
         """Join a team"""
+        if not request.user.is_authenticated:
+            return Response({'message': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         team = self.get_object()
         user = request.user
         
@@ -194,6 +203,8 @@ class TeamViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def leave(self, request, pk=None):
         """Leave a team"""
+        if not request.user.is_authenticated:
+            return Response({'message': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         team = self.get_object()
         user = request.user
         
@@ -217,6 +228,8 @@ class TeamViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_teams(self, request):
         """Get teams the current user is a member of"""
+        if not request.user.is_authenticated:
+            return Response({'message': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         teams = Team.objects.filter(members=request.user).prefetch_related('members', 'coach')
         serializer = self.get_serializer(teams, many=True)
         return Response(serializer.data)
@@ -306,6 +319,8 @@ class WorkoutSuggestionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def for_me(self, request):
         """Get workout suggestions for current user's fitness level"""
+        if not request.user.is_authenticated:
+            return Response({'message': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             profile = UserProfile.objects.get(user=request.user)
             suggestions = WorkoutSuggestion.objects.filter(fitness_level=profile.fitness_level)

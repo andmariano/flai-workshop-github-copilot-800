@@ -1,14 +1,29 @@
 from djongo import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class UserProfile(models.Model):
     """Extended user profile for OctoFit Tracker"""
     _id = models.ObjectIdField()
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    age = models.IntegerField(null=True, blank=True)
-    height = models.FloatField(null=True, blank=True, help_text="Height in cm")
-    weight = models.FloatField(null=True, blank=True, help_text="Weight in kg")
+    age = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(150)],
+    )
+    height = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Height in cm",
+        validators=[MinValueValidator(50), MaxValueValidator(300)],
+    )
+    weight = models.FloatField(
+        null=True,
+        blank=True,
+        help_text="Weight in kg",
+        validators=[MinValueValidator(20), MaxValueValidator(500)],
+    )
     fitness_level = models.CharField(
         max_length=20,
         choices=[
@@ -19,6 +34,7 @@ class UserProfile(models.Model):
         default='beginner'
     )
     total_points = models.IntegerField(default=0)
+    bio = models.TextField(blank=True, null=True)
     avatar = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -47,7 +63,10 @@ class Activity(models.Model):
             ('other', 'Other'),
         ]
     )
-    duration = models.IntegerField(help_text="Duration in minutes")
+    duration = models.IntegerField(
+        help_text="Duration in minutes",
+        validators=[MinValueValidator(1)],
+    )
     distance = models.FloatField(null=True, blank=True, help_text="Distance in km")
     calories = models.IntegerField(null=True, blank=True)
     points_earned = models.IntegerField(default=0)

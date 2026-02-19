@@ -14,22 +14,18 @@ function WorkoutSuggestions() {
   useEffect(() => {
     fetchSuggestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, []);
 
   const fetchSuggestions = async () => {
     try {
       setLoading(true);
-      console.log('Fetching workout suggestions from API endpoint: /api/workouts/ with filters:', filters);
       const data = await api.getWorkoutSuggestions(filters);
-      console.log('Workout suggestions data received:', data);
       
       // Handle both paginated (.results) and plain array responses
       const suggestionsArray = Array.isArray(data) ? data : (data?.results || []);
-      console.log('Processed workout suggestions array:', suggestionsArray);
       
       setSuggestions(suggestionsArray);
     } catch (err) {
-      console.error('Error fetching workout suggestions:', err);
       setSuggestions([]);
     } finally {
       setLoading(false);
@@ -48,6 +44,10 @@ function WorkoutSuggestions() {
       fitness_level: '',
       activity_type: ''
     });
+  };
+
+  const applyFilters = () => {
+    fetchSuggestions();
   };
 
   if (loading) {
@@ -94,9 +94,15 @@ function WorkoutSuggestions() {
                 <option value="sports">Sports</option>
               </select>
             </div>
-            <div className="col-md-4 mb-3 d-flex align-items-end">
+            <div className="col-md-4 mb-3 d-flex align-items-end gap-2">
               <button 
-                className="btn btn-secondary w-100"
+                className="btn btn-primary flex-fill"
+                onClick={applyFilters}
+              >
+                Apply Filters
+              </button>
+              <button 
+                className="btn btn-secondary flex-fill"
                 onClick={clearFilters}
               >
                 Clear Filters
