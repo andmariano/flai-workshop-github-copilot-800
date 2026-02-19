@@ -14,12 +14,22 @@ function Leaderboard() {
   const fetchLeaderboards = async () => {
     try {
       setLoading(true);
+      console.log('Fetching leaderboards from API endpoints: /api/leaderboard/ and /api/team-leaderboard/');
       const [users, teams] = await Promise.all([
         api.getLeaderboard(20),
         api.getTeamLeaderboard(20)
       ]);
-      setUserLeaderboard(users);
-      setTeamLeaderboard(teams);
+      console.log('User leaderboard data received:', users);
+      console.log('Team leaderboard data received:', teams);
+      
+      // Handle both paginated (.results) and plain array responses
+      const usersArray = Array.isArray(users) ? users : (users?.results || []);
+      const teamsArray = Array.isArray(teams) ? teams : (teams?.results || []);
+      console.log('Processed user leaderboard array:', usersArray);
+      console.log('Processed team leaderboard array:', teamsArray);
+      
+      setUserLeaderboard(usersArray);
+      setTeamLeaderboard(teamsArray);
     } catch (err) {
       console.error('Error fetching leaderboards:', err);
       setUserLeaderboard([]);
@@ -76,7 +86,9 @@ function Leaderboard() {
                   <tr>
                     <th>Rank</th>
                     <th>Username</th>
+                    <th>Team</th>
                     <th>Activities</th>
+                    <th>Total Calories</th>
                     <th>Total Points</th>
                   </tr>
                 </thead>
@@ -84,8 +96,18 @@ function Leaderboard() {
                   {userLeaderboard.map((entry) => (
                     <tr key={entry.user_id}>
                       <td><strong>{getRankBadge(entry.rank)}</strong></td>
-                      <td>{entry.username}</td>
+                      <td>
+                        <strong>{entry.username}</strong>
+                      </td>
+                      <td>
+                        {entry.team_name ? (
+                          <span className="badge bg-info">{entry.team_name}</span>
+                        ) : (
+                          <span className="text-muted">N/A</span>
+                        )}
+                      </td>
                       <td>{entry.activity_count}</td>
+                      <td>{entry.total_calories || 0}</td>
                       <td>
                         <span className="badge bg-success">{entry.total_points} pts</span>
                       </td>

@@ -159,9 +159,13 @@ class ActivityViewSet(viewsets.ModelViewSet):
 
 class TeamViewSet(viewsets.ModelViewSet):
     """ViewSet for teams"""
-    queryset = Team.objects.all()
+    queryset = Team.objects.all().prefetch_related('members', 'coach')
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Optimize queryset with prefetch_related"""
+        return Team.objects.all().prefetch_related('members', 'coach')
 
     def get_serializer_class(self):
         """Use different serializers for create vs read"""
@@ -213,7 +217,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_teams(self, request):
         """Get teams the current user is a member of"""
-        teams = Team.objects.filter(members=request.user)
+        teams = Team.objects.filter(members=request.user).prefetch_related('members', 'coach')
         serializer = self.get_serializer(teams, many=True)
         return Response(serializer.data)
 
@@ -325,11 +329,24 @@ def leaderboard(request):
     leaderboard_data = []
     for rank, profile in enumerate(profiles, start=1):
         activity_count = Activity.objects.filter(user=profile.user).count()
+        
+        # Calculate total calories
+        from django.db.models import Sum
+        total_calories = Activity.objects.filter(user=profile.user).aggregate(
+            Sum('calories')
+        )['calories__sum'] or 0
+        
+        # Get user's primary team (first team they're a member of)
+        user_team = Team.objects.filter(members=profile.user).first()
+        team_name = user_team.name if user_team else None
+        
         leaderboard_data.append({
             'user_id': profile.user.id,
             'username': profile.user.username,
             'total_points': profile.total_points,
             'activity_count': activity_count,
+            'total_calories': total_calories,
+            'team_name': team_name,
             'rank': rank
         })
     

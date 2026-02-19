@@ -7,6 +7,21 @@ function Challenges() {
   const [loading, setLoading] = useState(true);
   const [showActive, setShowActive] = useState(true);
 
+  // Helper function to safely format dates
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString();
+      }
+      return '-';
+    } catch (error) {
+      console.error('Error parsing date:', error, dateString);
+      return '-';
+    }
+  };
+
   useEffect(() => {
     fetchChallenges();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -109,7 +124,7 @@ function Challenges() {
                     <p className="text-muted mb-2">
                       <strong>Type:</strong> {getChallengeTypeLabel(challenge.challenge_type)}<br />
                       <strong>Target:</strong> {challenge.target_value}<br />
-                      <strong>Period:</strong> {new Date(challenge.start_date).toLocaleDateString()} - {new Date(challenge.end_date).toLocaleDateString()}
+                      <strong>Period:</strong> {formatDate(challenge.start_date)} - {formatDate(challenge.end_date)}
                     </p>
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="badge bg-info">{challenge.participant_count} participants</span>
@@ -149,7 +164,7 @@ function Challenges() {
                   <p className="text-muted mb-2">
                     <strong>Type:</strong> {getChallengeTypeLabel(challenge.challenge_type)}<br />
                     <strong>Target:</strong> {challenge.target_value}<br />
-                    <strong>Period:</strong> {new Date(challenge.start_date).toLocaleDateString()} - {new Date(challenge.end_date).toLocaleDateString()}
+                    <strong>Period:</strong> {formatDate(challenge.start_date)} - {formatDate(challenge.end_date)}
                   </p>
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="badge bg-info">{challenge.participant_count} participants</span>

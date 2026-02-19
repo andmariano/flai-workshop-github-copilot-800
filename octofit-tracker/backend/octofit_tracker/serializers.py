@@ -63,10 +63,10 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ['_id', 'name', 'description', 'coach', 'coach_name', 
+        fields = ['id', '_id', 'name', 'description', 'coach', 'coach_name', 
                   'members', 'member_count', 'total_points', 'avatar', 
                   'created_at', 'updated_at']
-        read_only_fields = ['_id', 'total_points', 'created_at', 'updated_at']
+        read_only_fields = ['id', '_id', 'total_points', 'created_at', 'updated_at']
 
     def get__id(self, obj):
         """Convert ObjectId to string"""
@@ -140,4 +140,6 @@ class LeaderboardSerializer(serializers.Serializer):
     username = serializers.CharField()
     total_points = serializers.IntegerField()
     activity_count = serializers.IntegerField()
+    total_calories = serializers.IntegerField()
+    team_name = serializers.CharField(allow_null=True)
     rank = serializers.IntegerField()

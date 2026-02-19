@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 function Dashboard() {
@@ -85,22 +86,54 @@ function Dashboard() {
         <div className="col-md-8">
           <h4>Recent Activities</h4>
           {recentActivities.length === 0 ? (
-            <p className="text-muted">No activities yet. Start logging your workouts!</p>
+            <div className="alert alert-info">
+              No activities yet. Start logging your workouts!
+            </div>
           ) : (
-            <div className="list-group">
-              {recentActivities.map((activity) => (
-                <div key={activity._id} className="list-group-item">
-                  <div className="d-flex w-100 justify-content-between">
-                    <h5 className="mb-1">{activity.activity_type}</h5>
-                    <small>{new Date(activity.date).toLocaleDateString()}</small>
-                  </div>
-                  <p className="mb-1">
-                    Duration: {activity.duration} min | Points: {activity.points_earned}
-                    {activity.distance && ` | Distance: ${activity.distance} km`}
-                  </p>
-                  {activity.notes && <small className="text-muted">{activity.notes}</small>}
-                </div>
-              ))}
+            <div className="table-responsive">
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <th>Distance</th>
+                    <th>Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentActivities.map((activity) => {
+                    // Safely parse date
+                    let formattedDate = '-';
+                    if (activity.date) {
+                      try {
+                        const dateObj = new Date(activity.date);
+                        if (!isNaN(dateObj.getTime())) {
+                          formattedDate = dateObj.toLocaleDateString();
+                        }
+                      } catch (error) {
+                        console.error('Error parsing date:', error, activity.date);
+                      }
+                    }
+                    
+                    return (
+                      <tr key={activity._id}>
+                        <td>{formattedDate}</td>
+                        <td>
+                          <span className="badge bg-primary text-capitalize">
+                            {activity.activity_type.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td>{activity.duration} min</td>
+                        <td>{activity.distance ? `${activity.distance} km` : '-'}</td>
+                        <td>
+                          <span className="badge bg-success">{activity.points_earned} pts</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -108,10 +141,10 @@ function Dashboard() {
         <div className="col-md-4">
           <h4>Quick Actions</h4>
           <div className="d-grid gap-2">
-            <a href="/activities" className="btn btn-primary">Log Activity</a>
-            <a href="/teams" className="btn btn-outline-primary">View Teams</a>
-            <a href="/challenges" className="btn btn-outline-primary">Browse Challenges</a>
-            <a href="/workouts" className="btn btn-outline-primary">Get Workout Suggestions</a>
+            <Link to="/activities" className="btn btn-primary">Log Activity</Link>
+            <Link to="/teams" className="btn btn-outline-primary">View Teams</Link>
+            <Link to="/challenges" className="btn btn-outline-primary">Browse Challenges</Link>
+            <Link to="/workouts" className="btn btn-outline-primary">Get Workout Suggestions</Link>
           </div>
         </div>
       </div>

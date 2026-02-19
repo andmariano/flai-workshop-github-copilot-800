@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 function Home() {
   return (
@@ -13,41 +14,47 @@ function Home() {
           OctoFit Tracker helps you log activities, join teams, participate in challenges,
           and get personalized workout suggestions tailored to your fitness level.
         </p>
-        <a className="btn btn-primary btn-lg" href="/dashboard" role="button">
+        <Link className="btn btn-primary btn-lg" to="/dashboard" role="button">
           Get Started
-        </a>
+        </Link>
       </div>
 
       <div className="row mt-5">
         <div className="col-md-4 mb-4">
-          <div className="card h-100">
-            <div className="card-body text-center">
-              <h3>📊 Track Activities</h3>
-              <p className="card-text">
-                Log your workouts, monitor progress, and earn points for staying active.
-              </p>
+          <Link to="/users" className="text-decoration-none">
+            <div className="card h-100 card-hover">
+              <div className="card-body text-center">
+                <h3>👥 Users</h3>
+                <p className="card-text">
+                  View all users, their profiles, and fitness levels in the community.
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
         <div className="col-md-4 mb-4">
-          <div className="card h-100">
-            <div className="card-body text-center">
-              <h3>👥 Join Teams</h3>
-              <p className="card-text">
-                Create or join teams, compete together, and motivate each other to stay fit.
-              </p>
+          <Link to="/activities" className="text-decoration-none">
+            <div className="card h-100 card-hover">
+              <div className="card-body text-center">
+                <h3>📊 Activities</h3>
+                <p className="card-text">
+                  Log your workouts, monitor progress, and earn points for staying active.
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
         <div className="col-md-4 mb-4">
-          <div className="card h-100">
-            <div className="card-body text-center">
-              <h3>🏆 Compete</h3>
-              <p className="card-text">
-                Participate in challenges, climb the leaderboard, and earn achievements.
-              </p>
+          <Link to="/leaderboard" className="text-decoration-none">
+            <div className="card h-100 card-hover">
+              <div className="card-body text-center">
+                <h3>🏆 Leaderboard</h3>
+                <p className="card-text">
+                  See how you rank among other users and teams in the community.
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -59,9 +66,9 @@ function Home() {
               <p className="card-text">
                 Get workout suggestions tailored to your fitness level and preferences.
               </p>
-              <a href="/workouts" className="btn btn-outline-primary">
+              <Link to="/workouts" className="btn btn-outline-primary">
                 View Workouts
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -72,9 +79,9 @@ function Home() {
               <p className="card-text">
                 See how you rank among other users and teams in the community.
               </p>
-              <a href="/leaderboard" className="btn btn-outline-primary">
+              <Link to="/leaderboard" className="btn btn-outline-primary">
                 View Leaderboard
-              </a>
+              </Link>
             </div>
           </div>
         </div>

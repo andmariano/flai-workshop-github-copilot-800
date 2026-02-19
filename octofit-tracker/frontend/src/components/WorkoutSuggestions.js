@@ -17,8 +17,15 @@ function WorkoutSuggestions() {
   const fetchSuggestions = async () => {
     try {
       setLoading(true);
+      console.log('Fetching workout suggestions from API endpoint: /api/workouts/ with filters:', filters);
       const data = await api.getWorkoutSuggestions(filters);
-      setSuggestions(data);
+      console.log('Workout suggestions data received:', data);
+      
+      // Handle both paginated (.results) and plain array responses
+      const suggestionsArray = Array.isArray(data) ? data : (data?.results || []);
+      console.log('Processed workout suggestions array:', suggestionsArray);
+      
+      setSuggestions(suggestionsArray);
     } catch (err) {
       console.error('Error fetching workout suggestions:', err);
       setSuggestions([]);
@@ -106,30 +113,61 @@ function WorkoutSuggestions() {
           </div>
         ) : (
           suggestions.map((suggestion) => (
-            <div key={suggestion._id} className="col-md-6 col-lg-4 mb-4">
+            <div key={suggestion._id || suggestion.id} className="col-md-6 col-lg-4 mb-4">
               <div className="card h-100">
                 <div className="card-body">
-                  <h5 className="card-title">{suggestion.title}</h5>
-                  <div className="mb-2">
-                    <span className="badge bg-primary me-2">
-                      {suggestion.fitness_level}
+                  <h5 className="card-title">{suggestion.title || suggestion.name}</h5>
+                  <div className="mb-3">
+                    <span className="badge bg-primary me-2 text-capitalize">
+                      {suggestion.fitness_level || suggestion.difficulty || 'N/A'}
                     </span>
-                    <span className="badge bg-info">
-                      {suggestion.duration} min
+                    <span className="badge bg-info me-2">
+                      {suggestion.duration || suggestion.duration_minutes || 0} min
                     </span>
+                    {(suggestion.activity_type || suggestion.recommended_for) && (
+                      <span className="badge bg-secondary text-capitalize">
+                        {suggestion.activity_type 
+                          ? suggestion.activity_type.replace('_', ' ')
+                          : Array.isArray(suggestion.recommended_for) 
+                            ? suggestion.recommended_for.join(', ')
+                            : suggestion.recommended_for}
+                      </span>
+                    )}
                   </div>
                   <p className="card-text">{suggestion.description}</p>
-                  <hr />
-                  <h6>Instructions:</h6>
-                  <p className="card-text small">{suggestion.instructions}</p>
+                  
+                  {suggestion.instructions && (
+                    <>
+                      <hr />
+                      <h6><strong>Instructions:</strong></h6>
+                      <p className="card-text small">{suggestion.instructions}</p>
+                    </>
+                  )}
+                  
+                  {suggestion.exercises && Array.isArray(suggestion.exercises) && (
+                    <>
+                      <hr />
+                      <h6><strong>Exercises:</strong></h6>
+                      <ul className="small">
+                        {suggestion.exercises.map((exercise, idx) => (
+                          <li key={idx}>
+                            <strong>{exercise.name}</strong>
+                            {exercise.sets && exercise.reps && ` - ${exercise.sets} sets × ${exercise.reps} reps`}
+                            {exercise.duration_minutes && ` - ${exercise.duration_minutes} minutes`}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                  
                   {suggestion.video_url && (
                     <a 
                       href={suggestion.video_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="btn btn-sm btn-outline-primary"
+                      className="btn btn-sm btn-outline-primary mt-2"
                     >
-                      Watch Video
+                      📺 Watch Video
                     </a>
                   )}
                 </div>

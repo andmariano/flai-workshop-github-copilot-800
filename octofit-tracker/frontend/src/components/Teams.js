@@ -19,12 +19,22 @@ function Teams() {
   const fetchTeams = async () => {
     try {
       setLoading(true);
+      console.log('Fetching teams from API endpoints: /api/teams/ and /api/teams/my_teams/');
       const [allTeams, userTeams] = await Promise.all([
         api.getTeams(),
         api.getMyTeams()
       ]);
-      setTeams(allTeams);
-      setMyTeams(userTeams);
+      console.log('All teams data received:', allTeams);
+      console.log('My teams data received:', userTeams);
+      
+      // Handle both paginated (.results) and plain array responses
+      const teamsArray = Array.isArray(allTeams) ? allTeams : (allTeams?.results || []);
+      const myTeamsArray = Array.isArray(userTeams) ? userTeams : (userTeams?.results || []);
+      console.log('Processed all teams array:', teamsArray);
+      console.log('Processed my teams array:', myTeamsArray);
+      
+      setTeams(teamsArray);
+      setMyTeams(myTeamsArray);
     } catch (err) {
       console.error('Error fetching teams:', err);
       setTeams([]);
@@ -150,8 +160,8 @@ function Teams() {
                     <p className="card-text">{team.description}</p>
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
-                        <span className="badge bg-info me-2">{team.member_count} members</span>
-                        <span className="badge bg-success">{team.total_points} points</span>
+                        <span className="badge bg-info me-2">{team.member_count || 0} members</span>
+                        <span className="badge bg-success">{team.total_points || 0} points</span>
                       </div>
                       <button 
                         className="btn btn-sm btn-outline-danger"
@@ -185,8 +195,8 @@ function Teams() {
                   <p className="card-text">{team.description}</p>
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
-                      <span className="badge bg-info me-2">{team.member_count} members</span>
-                      <span className="badge bg-success">{team.total_points} points</span>
+                      <span className="badge bg-info me-2">{team.member_count || 0} members</span>
+                      <span className="badge bg-success">{team.total_points || 0} points</span>
                     </div>
                     {isInTeam(team.id) ? (
                       <span className="badge bg-primary">Member</span>

@@ -21,8 +21,15 @@ function Activities() {
   const fetchActivities = async () => {
     try {
       setLoading(true);
+      console.log('Fetching activities from API endpoint: /api/activities/my_activities/');
       const data = await api.getMyActivities();
-      setActivities(data);
+      console.log('Activities data received:', data);
+      
+      // Handle both paginated (.results) and plain array responses
+      const activitiesArray = Array.isArray(data) ? data : (data?.results || []);
+      console.log('Processed activities array:', activitiesArray);
+      
+      setActivities(activitiesArray);
     } catch (err) {
       console.error('Error fetching activities:', err);
       setActivities([]);
@@ -162,37 +169,65 @@ function Activities() {
         </div>
       )}
 
-      <div className="row">
+      <div className="activities-list">
         {activities.length === 0 ? (
-          <div className="col-12">
-            <div className="alert alert-info">
-              No activities logged yet. Start tracking your workouts!
-            </div>
+          <div className="alert alert-info">
+            No activities logged yet. Start tracking your workouts!
           </div>
         ) : (
-          activities.map((activity) => (
-            <div key={activity._id} className="col-md-6 mb-3">
-              <div className="card">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <h5 className="card-title text-capitalize">
-                      {activity.activity_type.replace('_', ' ')}
-                    </h5>
-                    <span className="badge bg-success">{activity.points_earned} pts</span>
-                  </div>
-                  <p className="card-text">
-                    <strong>Date:</strong> {new Date(activity.date).toLocaleDateString()}<br />
-                    <strong>Duration:</strong> {activity.duration} minutes<br />
-                    {activity.distance && <><strong>Distance:</strong> {activity.distance} km<br /></>}
-                    {activity.calories && <><strong>Calories:</strong> {activity.calories}<br /></>}
-                  </p>
-                  {activity.notes && (
-                    <p className="card-text"><small className="text-muted">{activity.notes}</small></p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))
+          <div className="table-responsive">
+            <table className="table table-hover">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Activity Type</th>
+                  <th>Duration</th>
+                  <th>Distance</th>
+                  <th>Calories</th>
+                  <th>Points</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activities.map((activity) => {
+                  // Safely parse date
+                  let formattedDate = '-';
+                  if (activity.date) {
+                    try {
+                      const dateObj = new Date(activity.date);
+                      if (!isNaN(dateObj.getTime())) {
+                        formattedDate = dateObj.toLocaleDateString();
+                      }
+                    } catch (error) {
+                      console.error('Error parsing date:', error, activity.date);
+                    }
+                  }
+                  
+                  return (
+                    <tr key={activity._id}>
+                      <td>{formattedDate}</td>
+                      <td>
+                        <span className="badge bg-primary text-capitalize">
+                          {activity.activity_type.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td>{activity.duration} min</td>
+                      <td>{activity.distance ? `${activity.distance} km` : '-'}</td>
+                      <td>{activity.calories || '-'}</td>
+                      <td>
+                        <span className="badge bg-success">{activity.points_earned} pts</span>
+                      </td>
+                      <td>
+                        <small className="text-muted">
+                          {activity.notes ? (activity.notes.length > 50 ? activity.notes.substring(0, 50) + '...' : activity.notes) : '-'}
+                        </small>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

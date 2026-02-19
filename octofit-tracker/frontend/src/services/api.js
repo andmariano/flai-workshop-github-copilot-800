@@ -1,10 +1,23 @@
 // API service for OctoFit Tracker
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+// Use Codespace URL if in Codespace environment, otherwise localhost
+const getApiBaseUrl = () => {
+  const codespace = process.env.REACT_APP_CODESPACE_NAME;
+  if (codespace) {
+    return `https://${codespace}-8000.app.github.dev/api`;
+  }
+  return process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+console.log('API Base URL:', API_BASE_URL);
 
 class ApiService {
   async request(endpoint, options = {}) {
     const url = `${API_BASE_URL}${endpoint}`;
+    console.log(`API Request: ${options.method || 'GET'} ${url}`);
+    
     const config = {
       ...options,
       headers: {
@@ -21,7 +34,16 @@ class ApiService {
         throw new Error(error.message || 'API request failed');
       }
       
-      return await response.json();
+      const data = await response.json();
+      console.log(`API Response from ${endpoint}:`, data);
+      
+      // Handle paginated responses - extract results array if present
+      if (data && typeof data === 'object' && 'results' in data) {
+        console.log('Paginated response detected, returning results array');
+        return data.results;
+      }
+      
+      return data;
     } catch (error) {
       console.error('API Error:', error);
       throw error;
