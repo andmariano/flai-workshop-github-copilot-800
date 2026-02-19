@@ -88,7 +88,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
         user_id = self.request.query_params.get('user', None)
         if user_id:
             queryset = queryset.filter(user_id=user_id)
-        elif not self.request.user.is_staff:
+        elif self.request.user.is_authenticated and not self.request.user.is_staff:
             queryset = queryset.filter(user=self.request.user)
         
         # Filter by activity type
