@@ -20,10 +20,9 @@ function Workouts() {
     try {
       setLoading(true);
       const data = await api.getWorkoutSuggestions();
-      console.log('Workout suggestions data:', data);
       setSuggestions(data);
     } catch (error) {
-      console.error('Error fetching workout suggestions:', error);
+      setSuggestions([]);
     } finally {
       setLoading(false);
     }
@@ -43,21 +42,11 @@ function Workouts() {
       const data = await api.getWorkoutSuggestions(filters);
       setSuggestions(data);
     } catch (error) {
-      console.error('Error applying filters:', error);
+      setSuggestions([]);
     } finally {
       setLoading(false);
     }
   };
-
-  const filteredSuggestions = suggestions.filter(suggestion => {
-    if (filters.fitness_level && suggestion.fitness_level !== filters.fitness_level) {
-      return false;
-    }
-    if (filters.activity_type && suggestion.activity_type !== filters.activity_type) {
-      return false;
-    }
-    return true;
-  });
 
   if (loading) {
     return (
@@ -122,14 +111,14 @@ function Workouts() {
 
       {/* Workout Cards */}
       <div className="row">
-        {filteredSuggestions.length === 0 ? (
+        {suggestions.length === 0 ? (
           <div className="col-12">
             <div className="alert alert-info">
               No workout suggestions found matching your criteria.
             </div>
           </div>
         ) : (
-          filteredSuggestions.map((suggestion) => (
+          suggestions.map((suggestion) => (
             <div key={suggestion._id || suggestion.id} className="col-md-6 col-lg-4 mb-4">
               <div className="card h-100">
                 <div className="card-body">
