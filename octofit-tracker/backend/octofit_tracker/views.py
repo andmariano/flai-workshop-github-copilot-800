@@ -78,7 +78,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
     """ViewSet for activities"""
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         """Filter activities based on user"""
@@ -161,7 +161,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     """ViewSet for teams"""
     queryset = Team.objects.all().prefetch_related('members', 'coach')
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         """Optimize queryset with prefetch_related"""
@@ -285,7 +285,7 @@ class WorkoutSuggestionViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for workout suggestions"""
     queryset = WorkoutSuggestion.objects.all()
     serializer_class = WorkoutSuggestionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         """Filter workout suggestions based on fitness level"""
